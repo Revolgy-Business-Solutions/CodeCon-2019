@@ -70,7 +70,7 @@ build-n-publish-image:
   <<: *builder_setup
   <<: *deploy_filter
 
-  stage: push-artifacts
+  stage: push-image
 
   script:
     - docker build --pull --cache-from $IMAGE_REPO:latest -t "$IMAGE_REPO":latest -t "$IMAGE_REPO:$IMAGE_TAG" -f ./app/Dockerfile .
@@ -130,10 +130,10 @@ deploy-prod:
          ./helm/
     - time kubectl rollout status deployment/$RELEASE_NAME
 
-review-deploy:
-  stage: deploy-review
+feature-deploy:
+  stage: deploy-feature
   when: manual
-  <<: *review_filter 
+  <<: *feature_filter 
   <<: *builder_setup
   environment:
     name: $CI_COMMIT_REF_SLUG
@@ -156,10 +156,10 @@ review-deploy:
     - time kubectl rollout status -n $NAMESPACE deployment/$RELEASE_NAME
 
 
-review-destroy:
-  stage: deploy-review
+faeture-destroy:
+  stage: deploy-feature
   when: manual
-  <<: *review_filter
+  <<: *feature_filter
   <<: *builder_setup
   environment:
     name: $CI_COMMIT_REF_SLUG
