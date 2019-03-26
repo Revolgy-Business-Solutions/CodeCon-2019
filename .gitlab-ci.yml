@@ -53,7 +53,7 @@ build-image:
 
   script:
     - cd app
-    - docker build --pull --cache-from $IMAGE_REPO:latest -t "$IMAGE_REPO":latest -t "$IMAGE_REPO:$IMAGE_TAG" .
+    - docker build -t "$IMAGE_REPO":latest -t "$IMAGE_REPO:$IMAGE_TAG" .
 
 test:
   stage: test
