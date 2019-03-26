@@ -1,7 +1,7 @@
 image: docker:stable
 
 stages:
-    - build
+    - build-image
     - test
     - push-image
 #    - deploy-canary
@@ -37,27 +37,22 @@ services:
 .deploy-filter: &deploy_filter
   only:
     - master
+    - development
     - /^feature-k8s.*$/  
 
 .feature-filter: &feature_filter
   only:
     - /^feature-k8s.*$/
 
-build-make:
-  stage: build
-  before_script: 
-    - apk add --update alpine-sdk
+build-image:
+  <<: *builder_setup
+  <<: *deploy_filter
+
+  stage: build-image
+
   script:
-    - cd kuard
-    # - time make build 
-    # fake the build to make this faster
-    - sleep 1
-    - cp -pr fakebin/ bin/ 
-
-  artifacts:
-   paths:
-    - kuard/bin/
-
+    - cd app
+    - docker build --pull --cache-from $IMAGE_REPO:latest -t "$IMAGE_REPO":latest -t "$IMAGE_REPO:$IMAGE_TAG" .
 
 test:
   stage: test
@@ -66,14 +61,12 @@ test:
     - sleep 5
     - echo "all ok"
     
-build-n-publish-image:
-  <<: *builder_setup
+publish-image:
   <<: *deploy_filter
 
   stage: push-image
 
   script:
-    - docker build --pull --cache-from $IMAGE_REPO:latest -t "$IMAGE_REPO":latest -t "$IMAGE_REPO:$IMAGE_TAG" -f ./app/Dockerfile .
     - docker push "$IMAGE_REPO":latest 
     - docker push "$IMAGE_REPO:$IMAGE_TAG"
 
