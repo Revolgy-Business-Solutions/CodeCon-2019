@@ -4,15 +4,15 @@
 replicas: 1
 namespace: default
 image:
-  repository: gcr.io/kuar-demo/kuard-amd64
+  repository: gcr.io/codecon/demoapp
   tag: 1
   pullPolicy: IfNotPresent
 service:
   enabled: true
-  name: kuard
+  name: demoapp
   type: ClusterIP
   externalPort: 80
-  internalPort: 8080
+  internalPort: 8000
 spec:
   terminationGracePeriodSeconds: 0
 canary:

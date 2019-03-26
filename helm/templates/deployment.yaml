@@ -1,44 +1,29 @@
-apiVersion: apps/v1
+piVersion: apps/v1
 kind: Deployment
 metadata:
   labels:
     app: {{ template "app.name" . }}
     chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
-    {{ if hasSuffix "-canary" .Release.Name }}
-    track: canary
-    {{ else }}
-    track: stable
-    {{ end }}
     heritage: {{ .Release.Service }}
   name: {{ template "app.fullname" . }}
   namespace: {{ .Values.namespace }}
 spec:
   strategy:
     rollingUpdate:
-      maxSurge: 25%
-      maxUnavailable: 25%
+      maxSurge: 1
+      maxUnavailable: 0
     type: RollingUpdate
   replicas: {{ .Values.replicas }}
   selector:
     matchLabels:
       app: {{ template "app.name" . }}
       chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
-      {{ if hasSuffix "-canary" .Release.Name }}
-      track: canary
-      {{ else }}
-      track: stable
-      {{ end }}
       heritage: {{ .Release.Service }}
   template:
     metadata:
       labels:
         app: {{ template "app.name" . }}
         chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
-        {{ if hasSuffix "-canary" .Release.Name }}
-        track: canary
-        {{ else }}
-        track: stable
-        {{ end }}       
         heritage: {{ .Release.Service }}
     spec:
       containers:
@@ -50,7 +35,7 @@ spec:
         livenessProbe:
           httpGet:
             path: /healthy
-            port: 8080
+            port: 8000
           initialDelaySeconds: 5
           timeoutSeconds: 1
           periodSeconds: 10
@@ -58,7 +43,7 @@ spec:
         readinessProbe:
           httpGet:
             path: /ready
-            port: 8080
+            port: 8000
           initialDelaySeconds: 30
           timeoutSeconds: 1
           periodSeconds: 10

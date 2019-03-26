@@ -3,20 +3,20 @@ image: docker:stable
 stages:
     - build
     - test
-    - push-artifacts
-    - deploy-canary
+    - push-image
+#    - deploy-canary
+    - deploy-feature
     - deploy-prod
-    - deploy-review
 
 variables:
   # When using dind, it's wise to use the overlayfs driver for improved performance.
   DOCKER_DRIVER: overlay2
   DOCKER_HOST: tcp://docker:2375/
-  CLOUD_PROJECT: mab-testing
-  PROJECT_NAME: kuard
-  APP_NAME: kuard
-  CLUSTER_NAME: devfest
-  CLUSTER_ZONE: europe-west3-c
+  CLOUD_PROJECT: kot-test-207914
+  PROJECT_NAME: demoapp
+  APP_NAME: demoapp
+  CLUSTER_NAME: codecon-demo
+  CLUSTER_ZONE: europe-west1-c
   IMAGE_REPO: eu.gcr.io/${CLOUD_PROJECT}/${PROJECT_NAME}/${APP_NAME}
   IMAGE_TAG: "$CI_COMMIT_REF_SLUG.$CI_COMMIT_SHA"
   REVIEW_URL: "$APP_NAME-$CI_COMMIT_REF_SLUG.marekbartik.com"
@@ -37,13 +37,11 @@ services:
 .deploy-filter: &deploy_filter
   only:
     - master
-    - development
-    - /^feature-.*$/  
+    - /^feature-k8s.*$/  
 
-.review-filter: &review_filter
+.feature-filter: &feature_filter
   only:
-    - development
-    - /^feature-.*$/
+    - /^feature-k8s.*$/
 
 build-make:
   stage: build
@@ -64,7 +62,8 @@ build-make:
 test:
   stage: test
   script:
-    # TODO: add tests lol
+    # tests, right...? #yolo
+    - sleep 5
     - echo "all ok"
     
 build-n-publish-image:
@@ -74,41 +73,41 @@ build-n-publish-image:
   stage: push-artifacts
 
   script:
-    - docker build --pull --cache-from $IMAGE_REPO:latest -t "$IMAGE_REPO":latest -t "$IMAGE_REPO:$IMAGE_TAG" .
+    - docker build --pull --cache-from $IMAGE_REPO:latest -t "$IMAGE_REPO":latest -t "$IMAGE_REPO:$IMAGE_TAG" -f ./app/Dockerfile .
     - docker push "$IMAGE_REPO":latest 
     - docker push "$IMAGE_REPO:$IMAGE_TAG"
 
-deploy-canary:
-  stage: deploy-canary
-  only:
-    - master
-  <<: *builder_setup
-  variables:
-    RELEASE_NAME: $APP_NAME-canary
-  script:
-#    - sed -i "s#IMAGE_TAG#$IMAGE_REPO:$IMAGE_TAG#" k8s/kuard-canary.yaml
-#    - cat k8s/kuard-canary.yaml
-#    - kubectl apply -f k8s/kuard-canary.yaml
-    - set -x
-    - |
-       helm upgrade --install --force --debug $RELEASE_NAME \
-         --set replicas=1 \
-         --set image.repository="$IMAGE_REPO" \
-         --set image.tag="$IMAGE_TAG" \
-         ./helm/
-    - time kubectl rollout status deployment/$RELEASE_NAME
+#deploy-canary:
+#  stage: deploy-canary
+#  only:
+#    - master
+#  <<: *builder_setup
+#  variables:
+#    RELEASE_NAME: $APP_NAME-canary
+#  script:
+##    - sed -i "s#IMAGE_TAG#$IMAGE_REPO:$IMAGE_TAG#" k8s/kuard-canary.yaml
+##    - cat k8s/kuard-canary.yaml
+##    - kubectl apply -f k8s/kuard-canary.yaml
+#    - set -x
+#    - |
+#       helm upgrade --install --force --debug $RELEASE_NAME \
+#         --set replicas=1 \
+#         --set image.repository="$IMAGE_REPO" \
+#         --set image.tag="$IMAGE_TAG" \
+#         ./helm/
+#    - time kubectl rollout status deployment/$RELEASE_NAME
 
-destroy-canary:
-  stage: deploy-canary
-  when: manual
-  only:
-    - master
-  <<: *builder_setup
-  variables:
-    RELEASE_NAME: $APP_NAME-canary
-  script:
-#    - kubectl delete -f k8s/kuard-canary.yaml
-    - helm del --purge $RELEASE_NAME
+#destroy-canary:
+#  stage: deploy-canary
+#  when: manual
+#  only:
+#    - master
+#  <<: *builder_setup
+#  variables:
+#    RELEASE_NAME: $APP_NAME-canary
+#  script:
+##    - kubectl delete -f k8s/kuard-canary.yaml
+#    - helm del --purge $RELEASE_NAME
 
 deploy-prod:
   stage: deploy-prod
