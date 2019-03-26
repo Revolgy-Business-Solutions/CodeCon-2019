@@ -1,6 +1,7 @@
 image: docker:stable
 
 stages:
+    - build
     - build-image
     - test
     - push-image
@@ -163,17 +164,6 @@ faeture-destroy:
   script:
     - helm del --purge $RELEASE_NAME
     - kubectl delete namespace "$NAMESPACE"
-
-builder-image:
-  stage: build
-  only:
-    - master
-  when: manual
-  script: 
-    - echo "$GCLOUD_SERVICE_KEY" | base64 -d > /gcloud-service-key.json
-    - docker login -u gitlab-ci-token -p $CI_BUILD_TOKEN $CI_REGISTRY
-    - docker build --pull --cache-from $CI_REGISTRY_IMAGE:latest -f  pipeline-builder/Dockerfile -t $CI_REGISTRY_IMAGE:$CI_BUILD_REF -t $CI_REGISTRY_IMAGE:latest .
-    - docker push $CI_REGISTRY_IMAGE
     
 k8s-infra:
   stage: build
