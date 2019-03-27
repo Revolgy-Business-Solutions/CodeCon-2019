@@ -4,7 +4,7 @@ stages:
     - build-image
     - test
     - push-image
-#    - deploy-canary
+    - deploy-canary
     - deploy-development
     - deploy-feature
     - deploy-prod
@@ -84,90 +84,37 @@ publish-image:
     - docker push "$IMAGE_REPO:$IMAGE_TAG"
 
 deploy-development:
+  <<: *builder_setup
 
   stage: deploy-development
 
-  only:
-    - development
-
-  script:
+  script: 
+    - kubectl create namespace "$NAMESPACE" || echo "namespace already exists"
+    - set -x 
     - |
-       helm upgrade --install --debug $RELEASE_NAME \
-         -- set replicas=1 \
-         -- set image.repository="$IMAGE_REPO" \
-         -- set image.tag="$IMAGE_TAG" \
-         -- namespace="development"
-         ./helm/
-    - time kubectl rollout status deployment/$RELEASE_NAME
-
-#deploy-canary:
-#  stage: deploy-canary
-#  only:
-#    - master
-#  <<: *builder_setup
-#  variables:
-#    RELEASE_NAME: $APP_NAME-canary
-#  script:
-##    - sed -i "s#IMAGE_TAG#$IMAGE_REPO:$IMAGE_TAG#" k8s/kuard-canary.yaml
-##    - cat k8s/kuard-canary.yaml
-##    - kubectl apply -f k8s/kuard-canary.yaml
-#    - set -x
-#    - |
-#       helm upgrade --install --force --debug $RELEASE_NAME \
-#         --set replicas=1 \
-#         --set image.repository="$IMAGE_REPO" \
-#         --set image.tag="$IMAGE_TAG" \
-#         ./helm/
-#    - time kubectl rollout status deployment/$RELEASE_NAME
-
-#destroy-canary:
-#  stage: deploy-canary
-#  when: manual
-#  only:
-#    - master
-#  <<: *builder_setup
-#  variables:
-#    RELEASE_NAME: $APP_NAME-canary
-#  script:
-##    - kubectl delete -f k8s/kuard-canary.yaml
-#    - helm del --purge $RELEASE_NAME
-
-deploy-prod:
-  stage: deploy-prod
-  when: manual
-  only:
-    - master
-  <<: *builder_setup
-  variables:
-    RELEASE_NAME: $APP_NAME-prod
-  script:
-#    - sed -i "s#IMAGE_TAG#$IMAGE_REPO:$IMAGE_TAG#" k8s/kuard-prod.yaml
-#    - cat k8s/kuard-prod.yaml
-#    - kubectl apply -f k8s/kuard-prod.yaml
-    - set -x
-    - |
-       helm upgrade --install --force --debug $RELEASE_NAME \
-         --set replicas=5 \
+       helm upgrade --install --force --namespace development --debug $APP_NAME\
+         --set replicas=1 \
          --set image.repository="$IMAGE_REPO" \
          --set image.tag="$IMAGE_TAG" \
          ./helm/
-    - time kubectl rollout status deployment/$RELEASE_NAME
+    - time kubectl rollout status -n development deployment/$RELEASE_NAME
 
-feature-deploy:
-  stage: deploy-feature
-  when: manual
+deploy-feature:
   <<: *feature_filter 
   <<: *builder_setup
+
+  stage: deploy-feature
+
   environment:
     name: $CI_COMMIT_REF_SLUG
     url: https://$REVIEW_URL
+
   variables:
     NAMESPACE: $CI_COMMIT_REF_SLUG
     RELEASE_NAME: $APP_NAME-$CI_COMMIT_REF_SLUG
+
   script: 
-#    - sed -i "s#IMAGE_TAG#$IMAGE_REPO:$IMAGE_TAG#" k8s/kuard-prod.yaml
     - kubectl create namespace "$NAMESPACE" || echo "namespace already exists"
-#    - kubectl apply -n "$NAMESPACE" -f k8s/kuard-prod.yaml
     - set -x 
     - |
        helm upgrade --install --force --namespace $NAMESPACE --debug $RELEASE_NAME \
@@ -178,28 +125,97 @@ feature-deploy:
          ./helm/
     - time kubectl rollout status -n $NAMESPACE deployment/$RELEASE_NAME
 
-
 faeture-destroy:
-  stage: deploy-feature
-  when: manual
   <<: *feature_filter
   <<: *builder_setup
+
+  stage: deploy-feature
+
+  when: manual
+
   environment:
     name: $CI_COMMIT_REF_SLUG
     url: https://$REVIEW_URL
+
   variables:
     NAMESPACE: $CI_COMMIT_REF_SLUG
     RELEASE_NAME: $APP_NAME-$CI_COMMIT_REF_SLUG
+
   script:
     - helm del --purge $RELEASE_NAME
     - kubectl delete namespace "$NAMESPACE"
     
-k8s-infra:
-  stage: build-image
-  when: manual
+deploy-canary:
+  <<: *builder_setup
+
+  stage: deploy-canary
+
   only:
     - master
+
+  variables:
+    RELEASE_NAME: $APP_NAME-canary
+
+  script:
+    - set -x
+    - |
+       helm upgrade --install --force --debug $RELEASE_NAME \
+         --set replicas=1 \
+         --set image.repository="$IMAGE_REPO" \
+         --set image.tag="$IMAGE_TAG" \
+         ./helm/
+    - time kubectl rollout status deployment/$RELEASE_NAME
+
+destroy-canary:
   <<: *builder_setup
+
+  stage: deploy-canary
+
+  when: manual
+
+  only:
+    - master
+
+  variables:
+    RELEASE_NAME: $APP_NAME-canary
+
+  script:
+    - kubectl delete -f k8s/kuard-canary.yaml
+    - helm del --purge $RELEASE_NAME
+
+deploy-prod:
+  <<: *builder_setup
+
+  stage: deploy-prod
+
+  when: manual
+
+  only:
+    - master
+
+  variables:
+    RELEASE_NAME: $APP_NAME-prod
+
+  script:
+    - set -x
+    - |
+       helm upgrade --install --force --debug $RELEASE_NAME \
+         --set replicas=5 \
+         --set image.repository="$IMAGE_REPO" \
+         --set image.tag="$IMAGE_TAG" \
+         ./helm/
+    - time kubectl rollout status deployment/$RELEASE_NAME
+
+k8s-infra:
+  <<: *builder_setup
+
+  stage: build-image
+
+  when: manual
+
+  only:
+    - master
+
   script:
     - kubectl apply -f k8s/infra/
     - helm init --service-account tiller  --debug --upgrade
