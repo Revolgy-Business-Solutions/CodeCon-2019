@@ -1,11 +1,11 @@
 image: docker:stable
 
 stages:
-    - build
     - build-image
     - test
     - push-image
 #    - deploy-canary
+    - deploy-development
     - deploy-feature
     - deploy-prod
 
@@ -59,8 +59,13 @@ build-image:
     - docker push "$CONTAINER_TEST_IMAGE"
 
 test:
+  <<: *builder_setup
+  <<: *deploy_filter
+
   stage: test
+
   script:
+    - docker pull "$CONTAINER_TEST_IMAGE"
     # tests, right...? #yolo
     - sleep 5
     - echo "all ok"
@@ -72,11 +77,27 @@ publish-image:
   stage: push-image
 
   script:
-    - docker pull $CONTAINER_TEST_IMAGE
-    - docker tag $CONTAINER_TEST_IMAGE "$IMAGE_REPO":latest
-    - docker tag $CONTAINER_TEST_IMAGE "$IMAGE_REPO:$IMAGE_TAG"
+    - docker pull "$CONTAINER_TEST_IMAGE"
+    - docker tag "$CONTAINER_TEST_IMAGE" "$IMAGE_REPO":latest
+    - docker tag "$CONTAINER_TEST_IMAGE" "$IMAGE_REPO:$IMAGE_TAG"
     - docker push "$IMAGE_REPO":latest 
     - docker push "$IMAGE_REPO:$IMAGE_TAG"
+
+deploy-development:
+
+  stage: deploy-development
+
+  only: development
+
+  script:
+    - |
+       helm upgrade --install --debug $RELEASE_NAME \
+         -- set replicas=1 \
+         -- set image.repository="$IMAGE_REPO" \
+         -- set image.tag="$IMAGE_TAG" \
+         -- namespace="development"
+         ./helm/
+    - time kubectl rollout status deployment/$RELEASE_NAME
 
 #deploy-canary:
 #  stage: deploy-canary
