@@ -195,7 +195,7 @@ faeture-destroy:
     - kubectl delete namespace "$NAMESPACE"
     
 k8s-infra:
-  stage: build
+  stage: build-image
   when: manual
   only:
     - master
