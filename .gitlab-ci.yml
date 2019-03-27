@@ -87,7 +87,8 @@ deploy-development:
 
   stage: deploy-development
 
-  only: development
+  only:
+    - development
 
   script:
     - |
