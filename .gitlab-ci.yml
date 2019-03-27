@@ -14,13 +14,14 @@ variables:
   DOCKER_DRIVER: overlay2
   DOCKER_HOST: tcp://docker:2375/
   CLOUD_PROJECT: kot-test-207914
-  PROJECT_NAME: demoapp
+  PROJECT_NAME: codecon
   APP_NAME: demoapp
   CLUSTER_NAME: codecon-demo
   CLUSTER_ZONE: europe-west1-c
   IMAGE_REPO: eu.gcr.io/${CLOUD_PROJECT}/${PROJECT_NAME}/${APP_NAME}
   IMAGE_TAG: "$CI_COMMIT_REF_SLUG.$CI_COMMIT_SHA"
   REVIEW_URL: "$APP_NAME-$CI_COMMIT_REF_SLUG.marekbartik.com"
+  CONTAINER_TEST_IMAGE: $CI_REGISTRY_IMAGE$CI_COMMIT_REF_SLUG
 
 services:
   - docker:dind
@@ -53,7 +54,8 @@ build-image:
 
   script:
     - cd app
-    - docker build -t "$IMAGE_REPO":latest -t "$IMAGE_REPO:$IMAGE_TAG" .
+    - docker build -t $CONTAINER_TEST_IMAGE .
+    - docker push $CONTAINER_TEST_IMAGE
 
 test:
   stage: test
@@ -68,6 +70,9 @@ publish-image:
   stage: push-image
 
   script:
+    - docker pull $CONTAINER_TEST_IMAGE
+    - docker tag $CONTAINER_TEST_IMAGE "$IMAGE_REPO":latest
+    - docker tag $CONTAINER_TEST_IMAGE "$IMAGE_REPO:$IMAGE_TAG"
     - docker push "$IMAGE_REPO":latest 
     - docker push "$IMAGE_REPO:$IMAGE_TAG"
 
