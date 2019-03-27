@@ -54,8 +54,8 @@ build-image:
 
   script:
     - cd app
-    - docker build -t $CONTAINER_TEST_IMAGE .
-    - docker push $CONTAINER_TEST_IMAGE
+    - docker build -t "$CONTAINER_TEST_IMAGE" .
+    - docker push "$CONTAINER_TEST_IMAGE"
 
 test:
   stage: test
