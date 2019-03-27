@@ -30,6 +30,7 @@ services:
   image: $CI_REGISTRY_IMAGE:latest
 
   before_script: 
+    - docker login -u gitlab-ci-token -p $CI_JOB_TOKEN $CI_REGISTRY
     # Write our GCP service account private key into a file.
     - echo "$GCLOUD_SERVICE_KEY" | base64 -d > /gcloud-service-key.json
     - gcloud auth activate-service-account --key-file /gcloud-service-key.json 
