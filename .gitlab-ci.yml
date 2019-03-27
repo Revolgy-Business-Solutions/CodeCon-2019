@@ -66,6 +66,7 @@ test:
     - echo "all ok"
     
 publish-image:
+  <<: *builder_setup
   <<: *deploy_filter
 
   stage: push-image
