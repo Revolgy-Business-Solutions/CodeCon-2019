@@ -58,17 +58,17 @@ build-image:
     - docker build -t "$CONTAINER_TEST_IMAGE" .
     - docker push "$CONTAINER_TEST_IMAGE"
 
-test:
-  <<: *builder_setup
-  <<: *deploy_filter
-
-  stage: test
-
-  script:
-    - docker pull "$CONTAINER_TEST_IMAGE"
-    # tests, right...? #yolo
-    - sleep 3
-    - echo "all ok"
+#test:
+#  <<: *builder_setup
+#  <<: *deploy_filter
+#
+#  stage: test
+#
+#  script:
+#    - docker pull "$CONTAINER_TEST_IMAGE"
+#    # tests, right...? #yolo
+#    - sleep 3
+#    - echo "all ok"
     
 publish-image:
   <<: *builder_setup
@@ -105,7 +105,7 @@ deploy-development:
          --set image.tag="$IMAGE_TAG" \
          --set namespace="$NAMESPACE" \
          ./helm/
-    - time kubectl rollout status -n development deployment/$RELEASE_NAME
+    - time kubectl rollout status -n development deployment/$APP_NAME
 
 feature-deploy:
   <<: *feature_filter 
