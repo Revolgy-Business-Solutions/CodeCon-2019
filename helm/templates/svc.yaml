@@ -18,4 +18,3 @@ spec:
     app: {{ template "app.name" . }}
   sessionAffinity: None
   type: {{ .Values.service.type }} 
----

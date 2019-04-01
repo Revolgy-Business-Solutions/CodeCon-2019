@@ -67,7 +67,7 @@ test:
   script:
     - docker pull "$CONTAINER_TEST_IMAGE"
     # tests, right...? #yolo
-    - sleep 5
+    - sleep 3
     - echo "all ok"
     
 publish-image:
