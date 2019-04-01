@@ -4,9 +4,9 @@ stages:
     - build-image
     - test
     - push-image
-    - deploy-canary
     - deploy-development
     - deploy-feature
+    - deploy-canary
     - deploy-prod
 
 variables:
@@ -212,7 +212,6 @@ destroy-canary:
     RELEASE_NAME: $APP_NAME-canary
 
   script:
-    - kubectl delete -f k8s/kuard-canary.yaml
     - helm del --purge $RELEASE_NAME
 
 deploy-prod:
