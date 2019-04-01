@@ -91,6 +91,9 @@ deploy-development:
 
   stage: deploy-development
 
+  variables:
+    NAMESPACE: $CI_COMMIT_REF_SLUG
+
   script: 
     - kubectl create namespace "$NAMESPACE" || echo "namespace already exists"
     - set -x 
@@ -181,6 +184,8 @@ deploy-canary:
   <<: *builder_setup
 
   stage: deploy-canary
+
+  when: manual
 
   only:
     - master
