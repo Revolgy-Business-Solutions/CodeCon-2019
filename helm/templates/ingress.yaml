@@ -15,7 +15,7 @@ spec:
       http:
         paths:
           - backend:
-              serviceName: demoapp
+              serviceName: goapp
               servicePort: 80
             path: /
 {{ else }}
@@ -23,16 +23,16 @@ spec:
       http:
         paths:
           - backend:
-              serviceName: demoapp
+              serviceName: goapp
               servicePort: 80
             path: /
 {{ end }}
   tls:
     - hosts:
 {{ if eq .Values.namespace  "default" }}
-        - "demoapp.revolgy.com"
+        - "demoapp.revolgy.cloud"
 {{ else }}
-        - "demoapp-{{ .Values.namespace }}.revolgy.com"
+        - "demoapp-{{ .Values.namespace }}.revolgy.cloud"
 {{ end }}
       secretName: example-tls
 {{- end }}
