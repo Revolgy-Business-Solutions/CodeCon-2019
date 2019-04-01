@@ -59,7 +59,7 @@ func main() {
 }
 
 func GetRoot(w http.ResponseWriter, r *http.Request) {
-  fmt.Fprintf(w, "Hello, GoLang backend here.\n")
+  fmt.Fprintf(w, "Hello, I am new feature.\n")
   log.Println("Root accessed.")
 }
 
