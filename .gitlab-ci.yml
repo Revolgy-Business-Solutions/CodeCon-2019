@@ -133,7 +133,7 @@ feature-deploy:
          ./helm/
     - time kubectl rollout status -n $NAMESPACE deployment/$RELEASE_NAME
 
-faeture-destroy:
+feature-teardown:
   <<: *feature_filter
   <<: *builder_setup
 
