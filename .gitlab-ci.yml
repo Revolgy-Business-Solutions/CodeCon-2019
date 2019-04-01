@@ -153,40 +153,38 @@ feature-teardown:
     - helm del --purge $RELEASE_NAME
     - kubectl delete namespace "$NAMESPACE"
     
-stage-deploy:
-  <<: *builder_setup
-
-  stage: deploy-feature
-
-  only:
-    - master
-
-  environment:
-    name: $CI_COMMIT_REF_SLUG
-    url: https://$REVIEW_URL
-
-  variables:
-    NAMESPACE: stage
-    RELEASE_NAME: $APP_NAME-$CI_COMMIT_REF_SLUG
-
-  script: 
-    - kubectl create namespace "$NAMESPACE" || echo "namespace already exists"
-    - set -x 
-    - |
-       helm upgrade --install --force --namespace $NAMESPACE --debug $RELEASE_NAME \
-         --set replicas=1 \
-         --set image.repository="$IMAGE_REPO" \
-         --set image.tag="$IMAGE_TAG" \
-         --set namespace=$NAMESPACE \
-         ./helm/
-    - time kubectl rollout status -n $NAMESPACE deployment/$RELEASE_NAME
+#stage-deploy:
+#  <<: *builder_setup
+#
+#  stage: deploy-feature
+#
+#  only:
+#    - master
+#
+#  environment:
+#    name: $CI_COMMIT_REF_SLUG
+#    url: https://$REVIEW_URL
+#
+#  variables:
+#    NAMESPACE: stage
+#    RELEASE_NAME: $APP_NAME-$CI_COMMIT_REF_SLUG
+#
+#  script: 
+#    - kubectl create namespace "$NAMESPACE" || echo "namespace already exists"
+#    - set -x 
+#    - |
+#       helm upgrade --install --force --namespace $NAMESPACE --debug $RELEASE_NAME \
+#         --set replicas=1 \
+#         --set image.repository="$IMAGE_REPO" \
+#         --set image.tag="$IMAGE_TAG" \
+#         --set namespace=$NAMESPACE \
+#         ./helm/
+#    - time kubectl rollout status -n $NAMESPACE deployment/$RELEASE_NAME
 
 deploy-canary:
   <<: *builder_setup
 
   stage: deploy-canary
-
-  when: manual
 
   only:
     - master
