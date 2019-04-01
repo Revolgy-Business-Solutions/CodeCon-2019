@@ -49,6 +49,8 @@ func main() {
   router.HandleFunc("/cpu", GetCpu).Methods("GET")
   router.HandleFunc("/kube", GetKube).Methods("GET")
   router.HandleFunc("/books", GetAllBooks).Methods("GET")
+  router.HandleFunc("/ready", GetReady).Methods("GET")
+  router.HandleFunc("/healthy", GetHealthy).Methods("GET")
   router.HandleFunc("/books/{id}", GetBook).Methods("GET")
   router.HandleFunc("/books/{id}", CreateBook).Methods("POST")
   router.HandleFunc("/books/{id}", DeleteBook).Methods("DELETE")
@@ -85,6 +87,16 @@ func GetCpu(w http.ResponseWriter, r *http.Request) {
 func GetKube(w http.ResponseWriter, r *http.Request) {
 
   http.ServeFile(w, r, "assets/kube.html")
+}
+
+func GetReady(w http.ResponseWriter, r *http.Request) {
+
+  fmt.Fprint(w, "I am ready.\n")
+}
+
+func GetHealthy(w http.ResponseWriter, r *http.Request) {
+
+  fmt.Fprint(w, "I am healthy.\n")
 }
 
 func GetAllBooks(w http.ResponseWriter, r *http.Request) {
