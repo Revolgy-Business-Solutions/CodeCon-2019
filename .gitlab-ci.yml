@@ -93,6 +93,7 @@ deploy-development:
 
   variables:
     NAMESPACE: $CI_COMMIT_REF_SLUG
+    RELEASE_NAME: $APP_NAME-$CI_COMMIT_REF_SLUG
 
   script: 
     - kubectl create namespace "$NAMESPACE" || echo "namespace already exists"
