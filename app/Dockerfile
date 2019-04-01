@@ -1,4 +1,8 @@
-FROM golang:onbuild as builder
+FROM golang:alpine as builder
+
+RUN apk add --no-cache git mercurial \
+    && go get github.com/go-sql-driver/mysql \
+    && go get github.com/gorilla/mux
 
 WORKDIR /app
 
