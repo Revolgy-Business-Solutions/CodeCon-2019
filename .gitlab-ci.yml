@@ -95,7 +95,7 @@ deploy-development:
     - kubectl create namespace "$NAMESPACE" || echo "namespace already exists"
     - set -x 
     - |
-       helm upgrade --install --force --namespace development --debug $APP_NAME\
+       helm upgrade --install --force --namespace development --debug $APP_NAME \
          --set replicas=1 \
          --set image.repository="$IMAGE_REPO" \
          --set image.tag="$IMAGE_TAG" \
