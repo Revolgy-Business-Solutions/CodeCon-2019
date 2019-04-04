@@ -65,4 +65,4 @@ Our pipeline jobs will be executed on gitlab runners. As we will use default sha
 
 ### Gitlab repository
 
-All our application code and pipeline configuration will be of course stored in gitlab repository.
+All our application code and pipeline configuration will be stored in gitlab repository.
