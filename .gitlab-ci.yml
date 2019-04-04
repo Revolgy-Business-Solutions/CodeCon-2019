@@ -13,14 +13,14 @@ variables:
   # When using dind, it's wise to use the overlayfs driver for improved performance.
   DOCKER_DRIVER: overlay2
   DOCKER_HOST: tcp://docker:2375/
-  CLOUD_PROJECT: kot-test-207914
+  CLOUD_PROJECT: __GOOGLE_CLOUD_PROJECT_ID__ #replace
+  CLUSTER_NAME: __GOOGLE_KUBERNETES_ENGINE_PROJECT_NAME__ #replace
   PROJECT_NAME: codecon
   APP_NAME: demoapp
-  CLUSTER_NAME: codecon-demo
-  CLUSTER_ZONE: europe-west1-c
+  CLUSTER_ZONE: europe-west1-c #replace
   IMAGE_REPO: eu.gcr.io/${CLOUD_PROJECT}/${PROJECT_NAME}/${APP_NAME}
   IMAGE_TAG: "$CI_COMMIT_REF_SLUG.$CI_COMMIT_SHA"
-  REVIEW_URL: "$APP_NAME-$CI_COMMIT_REF_SLUG.marekbartik.com"
+  REVIEW_URL: "$APP_NAME-$CI_COMMIT_REF_SLUG.revolgy.cloud"
   CONTAINER_TEST_IMAGE: "$CI_REGISTRY_IMAGE:$CI_COMMIT_REF_SLUG.$CI_COMMIT_SHA"
 
 services:

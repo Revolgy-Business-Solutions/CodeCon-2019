@@ -1,5 +1,7 @@
 #Gitlab CI/CD pipeline on GKE example
 
+Example of CI/CD within Gitlab presented on CodeCon 2019.
+
 In this example we will create CI/CD pipeline on gitlab, deploying into Kubernetes cluster running on Google Cloud Platform. For That we need to prepare The infrastructure. Apart from Kubernetes cluster itself, we will use additional tools that will help us with automation of the whole process.
 
 ## Google Cloud Platform
