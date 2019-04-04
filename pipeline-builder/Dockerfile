@@ -5,7 +5,6 @@ RUN apk add --update make ca-certificates openssl python curl bash tree git jq &
     update-ca-certificates
     
 ## Write our GCP service account private key into a file
-#ADD ./gcloud-service-key.json /gcloud-service-key.json
 WORKDIR /
 RUN cd / && wget https://dl.google.com/dl/cloudsdk/release/google-cloud-sdk.tar.gz && \
     tar zxvf google-cloud-sdk.tar.gz && \
