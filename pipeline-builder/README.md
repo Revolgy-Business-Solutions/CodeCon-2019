@@ -1,4 +1,4 @@
-#Docker image used as a pipeline builder
+# Docker image used as a pipeline builder
 
 Since we use some additional tools apart from docker engine in our pipeline, we need to prepare our own building image.
 
