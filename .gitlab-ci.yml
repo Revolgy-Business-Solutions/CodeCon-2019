@@ -20,7 +20,6 @@ variables:
   CLUSTER_ZONE: europe-west1-c #replace
   IMAGE_REPO: eu.gcr.io/${CLOUD_PROJECT}/${PROJECT_NAME}/${APP_NAME}
   IMAGE_TAG: "$CI_COMMIT_REF_SLUG.$CI_COMMIT_SHA"
-  REVIEW_URL: "$APP_NAME-$CI_COMMIT_REF_SLUG.revolgy.cloud"
   CONTAINER_TEST_IMAGE: "$CI_REGISTRY_IMAGE:$CI_COMMIT_REF_SLUG.$CI_COMMIT_SHA"
 
 services:
@@ -58,17 +57,17 @@ build-image:
     - docker build -t "$CONTAINER_TEST_IMAGE" .
     - docker push "$CONTAINER_TEST_IMAGE"
 
-#test:
-#  <<: *builder_setup
-#  <<: *deploy_filter
-#
-#  stage: test
-#
-#  script:
-#    - docker pull "$CONTAINER_TEST_IMAGE"
-#    # tests, right...? #yolo
-#    - sleep 3
-#    - echo "all ok"
+test:
+  <<: *builder_setup
+  <<: *deploy_filter
+
+  stage: test
+
+  script:
+    - docker pull "$CONTAINER_TEST_IMAGE"
+    # tests, right...? #yolo
+    - sleep 3
+    - echo "all ok"
     
 publish-image:
   <<: *builder_setup
@@ -115,7 +114,6 @@ feature-deploy:
 
   environment:
     name: $CI_COMMIT_REF_SLUG
-    url: https://$REVIEW_URL
 
   variables:
     NAMESPACE: $CI_COMMIT_REF_SLUG
@@ -143,7 +141,6 @@ feature-teardown:
 
   environment:
     name: $CI_COMMIT_REF_SLUG
-    url: https://$REVIEW_URL
 
   variables:
     NAMESPACE: $CI_COMMIT_REF_SLUG
@@ -153,33 +150,32 @@ feature-teardown:
     - helm del --purge $RELEASE_NAME
     - kubectl delete namespace "$NAMESPACE"
     
-#stage-deploy:
-#  <<: *builder_setup
-#
-#  stage: deploy-feature
-#
-#  only:
-#    - master
-#
-#  environment:
-#    name: $CI_COMMIT_REF_SLUG
-#    url: https://$REVIEW_URL
-#
-#  variables:
-#    NAMESPACE: stage
-#    RELEASE_NAME: $APP_NAME-$CI_COMMIT_REF_SLUG
-#
-#  script: 
-#    - kubectl create namespace "$NAMESPACE" || echo "namespace already exists"
-#    - set -x 
-#    - |
-#       helm upgrade --install --force --namespace $NAMESPACE --debug $RELEASE_NAME \
-#         --set replicas=1 \
-#         --set image.repository="$IMAGE_REPO" \
-#         --set image.tag="$IMAGE_TAG" \
-#         --set namespace=$NAMESPACE \
-#         ./helm/
-#    - time kubectl rollout status -n $NAMESPACE deployment/$RELEASE_NAME
+stage-deploy:
+  <<: *builder_setup
+
+  stage: deploy-feature
+
+  only:
+    - master
+
+  environment:
+    name: $CI_COMMIT_REF_SLUG
+
+  variables:
+    NAMESPACE: stage
+    RELEASE_NAME: $APP_NAME-$CI_COMMIT_REF_SLUG
+
+  script: 
+    - kubectl create namespace "$NAMESPACE" || echo "namespace already exists"
+    - set -x 
+    - |
+       helm upgrade --install --force --namespace $NAMESPACE --debug $RELEASE_NAME \
+         --set replicas=1 \
+         --set image.repository="$IMAGE_REPO" \
+         --set image.tag="$IMAGE_TAG" \
+         --set namespace=$NAMESPACE \
+         ./helm/
+    - time kubectl rollout status -n $NAMESPACE deployment/$RELEASE_NAME
 
 deploy-canary:
   <<: *builder_setup
