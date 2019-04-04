@@ -1,4 +1,4 @@
-#Gitlab CI/CD pipeline on GKE example
+# Gitlab CI/CD pipeline on GKE example
 
 Example of CI/CD within Gitlab presented on CodeCon 2019.
 
