@@ -1,3 +1,5 @@
+learn more about Revolgy: [www.revolgy.com/blog](https://www.revolgy.com/blog)
+
 # Gitlab CI/CD pipeline on GKE example
 
 Example of CI/CD within Gitlab presented on CodeCon 2019.
